@@ -7,28 +7,21 @@ export default function app({
   Component, pageProps: { session, ...pageProps }
 }) {
   return (
-
-    <>
+    <SessionProvider session={session}>
       <Head>
         <title>Indigenous Cultures RAG Chatbot</title>
-
-        {/* Basic favicon (recommended to include a favicon.ico in /public) */}
-        <link rel="icon" href="/favicon.svg" />
-
-        {/* PNG favicons for better support & sizes */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-
-        {/* Apple touch icon for iOS home-screen */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-
-        {/* Optional cache-busting parameter if you need to force browsers to update */}
-        {/* <link rel="icon" href="/favicon.ico?v=2" /> */}
+        <meta name="description" content="AI-powered chatbot for learning about indigenous cultures" />
+        
+        {/* SVG Favicon */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        
+        {/* Fallback for browsers that don't support SVG favicons */}
+        <link rel="alternate icon" href="/favicon.ico" />
+        
+        {/* For better browser compatibility */}
+        <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" />
       </Head>
       <Component {...pageProps} />
-      <SessionProvider session={session}>
-        <Component {...pageProps} />
-      </SessionProvider>
-    </>
+    </SessionProvider>
   )
 }
