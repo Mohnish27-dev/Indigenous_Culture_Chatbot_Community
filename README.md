@@ -153,10 +153,8 @@ rag-chatbot/
 
 ## 🔑 API Endpoints
 
-- `POST /api/chat` - Send a question and receive an AI-generated answer
-- `GET /api/chat-history` - Retrieve user's chat history
-- `POST /api/auth/signin` - Sign in with credentials
-- `GET /api/auth/session` - Get current user session
+- `POST /api/chat` - Send a question and receive an AI-generated answer or Sign in with credentials
+
 
 ## 🌟 Key Features Explained
 
