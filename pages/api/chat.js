@@ -71,10 +71,9 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
         });
 
         const data = await res.json();
-        console.log('Gemini API Response:', JSON.stringify(data, null, 2));
+        
 
         if (!res.ok) {
-            console.error('API Error Response:', data);
             // If 503 error (overloaded) and retries remaining, wait and retry
             if (res.status === 503 && retries > 0) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -95,7 +94,7 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
             }
         }
 
-        console.log('No valid response structure found, full data:', data);
+        
         return "No answer generated. Please try again.";
 
     } catch (error) {
@@ -156,5 +155,3 @@ const handleAnswer = async (req, res) => {
 }
 
 export default handleAnswer;
-
-

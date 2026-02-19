@@ -41,7 +41,7 @@ export default function ChatPage() {
       const data = await res.json();
       if (res.ok && data.messages) setMessages(data.messages);
     } catch (error) {
-      console.error("Error loading chat history:", error);
+      // console.error("Error loading chat history:", error);
     } finally {
       setLoadingHistory(false);
     }
@@ -66,7 +66,9 @@ export default function ChatPage() {
           ? "Invalid email or password. Please try again."
           : "An error occurred during sign in. Please try again."
       );
-    } else if (result?.ok) setError("");
+    } else {
+      setError("");
+    }
   }
 
   async function handleOAuthSignIn(provider) {
@@ -226,7 +228,8 @@ export default function ChatPage() {
               : data.error || "Sorry, something went wrong.",
         },
       ]);
-    } catch {
+    } catch (error) {
+      // console.error("An error occurred:", error);
       setMessages((prev) => [
         ...prev,
         { role: "bot", content: "Network error. Try again later." },
@@ -250,7 +253,7 @@ export default function ChatPage() {
                 </h1>
               </a>
               <p className="text-xs text-[#5A4E4A]">
-                Welcome, {session.user.name.split(" ")[0]}
+                Welcome, {session?.user?.name?.split(" ")[0]}
               </p>
             </div>
           </div>
