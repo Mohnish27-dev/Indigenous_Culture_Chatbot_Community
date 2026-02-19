@@ -15,6 +15,9 @@ for (const file of fs.readdirSync('./data')) {
     if(file.startsWith("chunks-")||file.startsWith("embed-")){
         continue;
     }
+    if (path.extname(file) !== '.txt') {
+        continue;
+    }
     const filePath = path.join('./data', file);
     const text = fs.readFileSync(filePath, 'utf-8')
     const chunks = chunkText(text);

@@ -1,6 +1,9 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from 'next/router';
+
+const ROLE_BOT = 'bot';
 
 export default function ChatPage() {
   const { data: session, status } = useSession();
@@ -11,6 +14,7 @@ export default function ChatPage() {
   const [isAsking, setIsAsking] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   // Suggested Questions related to the topics
   const suggestedQuestions = [
@@ -98,7 +102,7 @@ export default function ChatPage() {
           className="relative z-10 backdrop-blur-lg bg-white/40 border border-[#C86C52]/40 shadow-2xl rounded-2xl p-10 max-w-md w-full"
         >
           <button
-            onClick={() => (window.location.href = "/")}
+            onClick={() => router.push("/")}
             className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/50 transition-colors group"
             aria-label="Close"
           >
@@ -219,7 +223,7 @@ export default function ChatPage() {
       setMessages((prev) => [
         ...prev,
         {
-          role: "bot",
+          role: ROLE_BOT,
           content:
             data.success && data.answer
               ? data.answer
@@ -229,7 +233,7 @@ export default function ChatPage() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "bot", content: "Network error. Try again later." },
+        { role: ROLE_BOT, content: "Network error. Try again later." },
       ]);
     } finally {
       setIsAsking(false);
@@ -250,7 +254,7 @@ export default function ChatPage() {
                 </h1>
               </a>
               <p className="text-xs text-[#5A4E4A]">
-                Welcome, {session.user.name.split(" ")[0]}
+                Welcome, {session?.user?.name?.split(" ")[0]}
               </p>
             </div>
           </div>
@@ -289,9 +293,9 @@ export default function ChatPage() {
             </p>
           </div>
         ) : (
-          messages.map((msg, idx) => (
+          messages.map((msg, index) => (
             <motion.div
-              key={idx}
+              key={index + msg.content}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`flex ${

@@ -7,11 +7,11 @@ export default function Navbar() {
             {session ? (
                 <>
                     <span>Welcome, {session.user.name}</span>
-                    <button onClick={() => signOut()}>Signout</button>
+                    <button onClick={() => signOut()}>Signout</button>;
                 </>
             ) :
                 (
-                    <button onClick={() => signIn()}>Sign In</button>
+                    <button onClick={() => signIn()}>Sign In</button>;
                 )}
         </nav>
     )

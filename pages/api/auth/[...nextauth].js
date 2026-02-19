@@ -102,7 +102,7 @@ export const authOptions = {
             // Only handle OAuth providers (Google, GitHub, Twitter)
             // Skip credentials provider as user is already created in authorize()
             if (account.provider !== "credentials") {
-                await connectDb();
+                await await connectDb();
                 const existing = await User.findOne({ email: user.email });
                 
                 if (!existing) {
@@ -118,8 +118,8 @@ export const authOptions = {
             return true; // Allow sign-in
         },
         async session({ session, token, user }) {
-            // const dbUser = await User.findOne({ email: session.user.email });
-            // session.user.name = dbUser.username;
+            const dbUser = await User.findOne({ email: session.user.email });
+            session.user.name = dbUser.username;
 
             return session
         }

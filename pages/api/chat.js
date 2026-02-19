@@ -71,7 +71,7 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
         });
 
         const data = await res.json();
-        console.log('Gemini API Response:', JSON.stringify(data, null, 2));
+        // console.log('Gemini API Response:', JSON.stringify(data, null, 2));
 
         if (!res.ok) {
             console.error('API Error Response:', data);
@@ -107,9 +107,9 @@ const handleAnswer = async (req, res) => {
     const { question } = req.body;
 
     // Run session check and DB connection in parallel
+    await connectDb();
     const [session] = await Promise.all([
         getServerSession(req, res, authOptions),
-        connectDb()
     ]);
 
     if (!session) {
@@ -149,12 +149,12 @@ const handleAnswer = async (req, res) => {
         chat.messages.push({ role: "user", content: question });
         chat.messages.push({ role: "bot", content: answer });
         return chat.save();
-    }).catch(err => console.error('Error saving chat:', err));
+    }).catch(err => {
+        console.error('Error saving chat:', err)
+    });
 
     // Send response immediately without waiting for DB save
     res.status(200).json({ success: true, answer: answer });
 }
 
 export default handleAnswer;
-
-
