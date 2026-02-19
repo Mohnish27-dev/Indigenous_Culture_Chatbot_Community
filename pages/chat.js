@@ -1,4 +1,4 @@
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut, signIn } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/router';
@@ -13,6 +13,9 @@ export default function ChatPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   // Suggested Questions related to the topics
   const suggestedQuestions = [
@@ -56,9 +59,10 @@ export default function ChatPage() {
     setError("");
     const result = await signIn("credentials", {
       redirect: false,
-      email: e.target.email.value,
-      password: e.target.password.value,
-      name: e.target.name.value,
+      email: email,
+      password: password,
+      name: name,
+      callbackUrl: '/chat'
     });
     if (result?.error) {
       setError(
@@ -66,8 +70,6 @@ export default function ChatPage() {
           ? "Invalid email or password. Please try again."
           : "An error occurred during sign in. Please try again."
       );
-    } else if (result?.ok) {
-      router.push('/chat');
     }
   }
 
@@ -157,6 +159,8 @@ export default function ChatPage() {
               name="name"
               required
               placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
             />
             <input
@@ -164,6 +168,8 @@ export default function ChatPage() {
               name="email"
               required
               placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
             />
             <input
@@ -171,6 +177,8 @@ export default function ChatPage() {
               name="password"
               required
               placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
             />
             <motion.button

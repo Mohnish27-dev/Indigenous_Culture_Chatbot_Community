@@ -1,11 +1,10 @@
 import fetch from "node-fetch";
-import * as cheerio from 'cheerio';
 import fs from "fs";
 async function fetchWikiText(pageTitle) {
     const url = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle)}`
     const res = await fetch(url);
     const html = await res.text();
-    const $ = cheerio.load(html);
+    const $ = require('cheerio').load(html);
 
     let content = '';
     $('#mw-content-text .mw-parser-output > p').each((i, el) => {
