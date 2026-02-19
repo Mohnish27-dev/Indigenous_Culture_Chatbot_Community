@@ -1,4 +1,4 @@
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from 'next/router';
@@ -7,8 +7,6 @@ const ROLE_BOT = 'bot';
 
 export default function ChatPage() {
   const { data: session, status } = useSession();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
   const [isAsking, setIsAsking] = useState(false);
@@ -55,27 +53,31 @@ export default function ChatPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
     setError("");
     const result = await signIn("credentials", {
       redirect: false,
-      email: form.email,
-      password: form.password,
-      name: form.name,
+      email: e.target.email.value,
+      password: e.target.password.value,
+      name: e.target.name.value,
     });
-    setLoading(false);
     if (result?.error) {
       setError(
         result.error === "CredentialsSignin"
           ? "Invalid email or password. Please try again."
           : "An error occurred during sign in. Please try again."
       );
-    } else if (result?.ok) setError("");
+    } else if (result?.ok) {
+      router.push('/chat');
+    }
   }
 
   async function handleOAuthSignIn(provider) {
-    setError("");
-    await signIn(provider, { callbackUrl: "/chat" });
+    try {
+      await signIn(provider, { callbackUrl: "/chat" });
+    } catch (error) {
+      console.error("OAuth sign-in error:", error);
+      setError("Failed to sign in with " + provider + ". Please try again.");
+    }
   }
 
   // ---------------- LOGIN PAGE ---------------- //
@@ -152,36 +154,32 @@ export default function ChatPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
+              name="name"
               required
               placeholder="Full Name"
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
             <input
               type="email"
+              name="email"
               required
               placeholder="Email"
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
             <input
               type="password"
+              name="password"
               required
               placeholder="Password"
               className="w-full p-3 rounded-lg border-2 border-[#D8A047]/50 focus:border-[#C86C52] focus:outline-none"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              disabled={loading}
               className="w-full bg-gradient-to-r from-[#C86C52] to-[#D8A047] text-white font-bold py-2 rounded-lg shadow-md"
             >
-              {loading ? "Authenticating..." : "Sign In / Register"}
+              Sign In / Register
             </motion.button>
           </form>
 
@@ -230,7 +228,8 @@ export default function ChatPage() {
               : data.error || "Sorry, something went wrong.",
         },
       ]);
-    } catch {
+    } catch (error) {
+      console.error("Error asking question:", error);
       setMessages((prev) => [
         ...prev,
         { role: ROLE_BOT, content: "Network error. Try again later." },

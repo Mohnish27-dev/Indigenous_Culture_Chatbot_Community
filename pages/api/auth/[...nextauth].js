@@ -119,7 +119,7 @@ export const authOptions = {
         },
         async session({ session, token, user }) {
             const dbUser = await User.findOne({ email: session.user.email });
-            session.user.name = dbUser.username;
+            session.user.name = dbUser.name;
 
             return session
         }
