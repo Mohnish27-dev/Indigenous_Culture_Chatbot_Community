@@ -35,15 +35,15 @@ export const authOptions = {
             },
             async authorize(credentials) {
                 try {
-                    console.log("=== Credentials Login Attempt ===");
-                    console.log("Email:", credentials.email);
+                    // console.log("=== Credentials Login Attempt ===");
+                    // console.log("Email:", credentials.email);
                     
                     await connectDb();
                     let user = await User.findOne({ email: credentials.email });
                     
                     if (!user) {
                         // Register a new User
-                        console.log("Creating new user:", credentials.email);
+                        // console.log("Creating new user:", credentials.email);
                         const hashedPassword = await bcrypt.hash(credentials.password, 10);
                         user = await User.create({
                             name: credentials.name,
@@ -52,7 +52,7 @@ export const authOptions = {
                             provider: "credentials"
                         });
                         
-                        console.log("New user created successfully");
+                        // console.log("New user created successfully");
                         
                         // Return the newly created user
                         return {
@@ -65,21 +65,21 @@ export const authOptions = {
                     }
                     else {
                         // Login: compare password
-                        console.log("User found, verifying password");
+                        // console.log("User found, verifying password");
                         
                         // Check if user has a password (OAuth users won't have one)
                         if (!user.password) {
-                            console.log("User registered via OAuth, no password set");
+                            // console.log("User registered via OAuth, no password set");
                             return null;
                         }
                         
                         const valid = await bcrypt.compare(credentials.password, user.password);
                         if (!valid) {
-                            console.log("Invalid password for user:", credentials.email);
+                            // console.log("Invalid password for user:", credentials.email);
                             return null;
                         }
                         
-                        console.log("Login successful for:", credentials.email);
+                        // console.log("Login successful for:", credentials.email);
                         return {
                             id: user._id.toString(),
                             name: user.name,

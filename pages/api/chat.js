@@ -74,7 +74,6 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
         
 
         if (!res.ok) {
-            console.error('API Error Response:', data);
             // If 503 error (overloaded) and retries remaining, wait and retry
             if (res.status === 503 && retries > 0) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
