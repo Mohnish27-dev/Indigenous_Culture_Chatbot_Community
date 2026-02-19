@@ -108,7 +108,7 @@ const handleAnswer = async (req, res) => {
     // Run session check and DB connection in parallel
     const [session] = await Promise.all([
         getServerSession(req, res, authOptions),
-        await connectDb()
+        connectDb()
     ]);
 
     if (!session) {
