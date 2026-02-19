@@ -71,7 +71,7 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
         });
 
         const data = await res.json();
-        console.log('Gemini API Response:', JSON.stringify(data, null, 2));
+        
 
         if (!res.ok) {
             console.error('API Error Response:', data);
@@ -95,7 +95,7 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
             }
         }
 
-        console.log('No valid response structure found, full data:', data);
+        
         return "No answer generated. Please try again.";
 
     } catch (error) {
@@ -109,7 +109,7 @@ const handleAnswer = async (req, res) => {
     // Run session check and DB connection in parallel
     const [session] = await Promise.all([
         getServerSession(req, res, authOptions),
-        connectDb()
+        await connectDb()
     ]);
 
     if (!session) {
@@ -156,5 +156,3 @@ const handleAnswer = async (req, res) => {
 }
 
 export default handleAnswer;
-
-

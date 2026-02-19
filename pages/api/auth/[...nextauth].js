@@ -6,9 +6,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import connectDb from '../../../lib/mongoDb';
 import User from '../../../model/User';
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv"
+// import dotenv from "dotenv"
 // import EmailProvider from 'next-auth/providers/email'
-dotenv.config();
 
 export const authOptions = {
     secret: process.env.NEXTAUTH_SECRET || "your-secret-key-min-32-characters-long-for-development",
@@ -101,7 +100,7 @@ export const authOptions = {
         async signIn({ user, account}) {
             // Only handle OAuth providers (Google, GitHub, Twitter)
             // Skip credentials provider as user is already created in authorize()
-            if (account.provider !== "credentials") {
+            if (account && account.provider !== "credentials") {
                 await connectDb();
                 const existing = await User.findOne({ email: user.email });
                 
