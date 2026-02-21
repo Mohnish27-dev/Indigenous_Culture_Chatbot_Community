@@ -12,6 +12,13 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
 const INDEX_NAME = "indigenous-cultures";
 
+if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not set in environment variables.');
+}
+if (!PINECONE_API_KEY) {
+    throw new Error('PINECONE_API_KEY is not set in environment variables.');
+}
+
 const getGeminiEmbedding = async (text) => {
     try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
@@ -29,14 +36,16 @@ const getGeminiEmbedding = async (text) => {
         const data = await res.json();
 
         if (!res.ok) {
-            throw new Error(`Gemini API error: ${data.error?.message || JSON.stringify(data)}`);
+            console.error('Gemini API error response:', data);
+            throw new Error(`Gemini API error: ${{data.error?.message || JSON.stringify(data)}}`);
         }
 
         if (data.embedding && data.embedding.values) {
             return data.embedding.values;
+        } else {
+            console.error('Unexpected response structure from Gemini API:', data);
+            throw new Error(`No embedding returned or unexpected structure from Gemini API.`);
         }
-
-        throw new Error(`No embedding returned from Gemini API.`);
     } catch (error) {
         console.error('Error getting embedding:', error);
         throw error;
@@ -52,6 +61,7 @@ const queryPinecone = async (queryEmbedding) => {
         vector: queryEmbedding,
         topK: 10,
         includeMetadata: true
+        // TODO: Add tests for rate limiting scenarios.
     })
     return results.matches.map(match => match.metadata.text);
 }
@@ -84,17 +94,13 @@ const generateAnswerWithGemini = async (question, contextChunks, retries = 3) =>
         }
 
         // Safely extract the response text
-        if (data.candidates && Array.isArray(data.candidates) && data.candidates.length > 0) {
-            const candidate = data.candidates[0];
-            if (candidate.content && candidate.content.parts && Array.isArray(candidate.content.parts) && candidate.content.parts.length > 0) {
-                const text = candidate.content.parts[0].text;
-                if (text) {
-                    return text;
-                }
-            }
+        // Safely extract the response text using optional chaining
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+        if (text) {
+            return text;
         }
 
-        
+        console.error('No text found in Gemini response:', data);
         return "No answer generated. Please try again.";
 
     } catch (error) {
@@ -141,14 +147,18 @@ const handleAnswer = async (req, res) => {
     const answer = await generateAnswerWithGemini(question, contextChunks);
 
     // Save to database (don't await to send response faster)
-    Chat.findOne({ userEmail: email }).then(chat => {
+    // Save to database
+    try {
+        let chat = await Chat.findOne({ userEmail: email });
         if (!chat) {
             chat = new Chat({ userEmail: email, messages: [] });
         }
         chat.messages.push({ role: "user", content: question });
         chat.messages.push({ role: "bot", content: answer });
-        return chat.save();
-    }).catch(err => console.error('Error saving chat:', err));
+        await chat.save();
+    } catch (err) {
+        console.error('Error saving chat:', err);
+    }
 
     // Send response immediately without waiting for DB save
     res.status(200).json({ success: true, answer: answer });
