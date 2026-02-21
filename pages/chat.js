@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export default function ChatPage() {
   const { data: session, status } = useSession();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
@@ -31,19 +31,19 @@ export default function ChatPage() {
   ];
 
   useEffect(() => {
-    if (session) loadChatHistory();
-  }, [session]);
+    if (session && status === 'authenticated') loadChatHistory();
+    }}, [session, status]);
 
   async function loadChatHistory() {
     setLoadingHistory(true);
     try {
       const res = await fetch("/api/chat-history");
       const data = await res.json();
-      if (res.ok && data.messages) setMessages(data.messages);
+      if (res.ok && Array.isArray(data.messages)) setMessages(data.messages);
     } catch (error) {
-      // console.error("Error loading chat history:", error);
-    } finally {
-      setLoadingHistory(false);
+      console.error("Error loading chat history:", error);
+      setError("Failed to load chat history.");
+      }} finally {{
     }
   }
 
@@ -83,20 +83,33 @@ export default function ChatPage() {
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
           <motion.div
             animate={{ y: [0, 20, 0], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ repeat: Infinity, duration: 6 }}
+            transition={{{{ repeat: Infinity, duration: 6, ease: "easeInOut" }}}
             className="absolute top-10 left-20 w-64 h-64 bg-[#C86C52] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
           ></motion.div>
           <motion.div
             animate={{ y: [20, 0, 20], opacity: [0.4, 0.7, 0.4] }}
             transition={{ repeat: Infinity, duration: 8 }}
+            transition={{{{ repeat: Infinity, duration: 8, ease: "easeInOut" }}}
+          ></motion.div>
+        </div>
+<div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+          <motion.div
+            animate={{{{ y: [0, 20, 0], opacity: [0.3, 0.6, 0.3] }}}}
+            transition={{{{ repeat: Infinity, duration: 6, ease: "easeInOut" }}}}
+            className="absolute top-10 left-20 w-64 h-64 bg-[#C86C52] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+          ></motion.div>
+          <motion.div
+            animate={{{{ y: [20, 0, 20], opacity: [0.4, 0.7, 0.4] }}}}
+            transition={{{{ repeat: Infinity, duration: 8, ease: "easeInOut" }}}}
             className="absolute bottom-10 right-20 w-72 h-72 bg-[#2F5D50] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
           ></motion.div>
         </div>
 
         <motion.div
+        <motion.div
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          transition={{{{ duration: 0.8, ease: "easeOut" }}}
           className="relative z-10 backdrop-blur-lg bg-white/40 border border-[#C86C52]/40 shadow-2xl rounded-2xl p-10 max-w-md w-full"
         >
           <button
@@ -125,6 +138,9 @@ export default function ChatPage() {
                 repeat: Infinity,
                 repeatType: "reverse",
                 duration: 3,
+                ease: "easeInOut",
+                }}}}
+                className="mx-auto w-14 h-14 bg-gradient-to-tr from-[#C86C52] to-[#D8A047] rounded-full shadow-lg"
               }}
               className="mx-auto w-14 h-14 bg-gradient-to-tr from-[#C86C52] to-[#D8A047] rounded-full shadow-lg"
             ></motion.div>
@@ -173,7 +189,7 @@ export default function ChatPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{{{ scale: 1.05, transition: {{ duration: 0.2 }} }}}
               whileTap={{ scale: 0.95 }}
               type="submit"
               disabled={loading}
@@ -186,16 +202,20 @@ export default function ChatPage() {
           <div className="text-center mt-6 text-[#5A4E4A]">
             <p className="text-sm">Or continue with</p>
             <div className="flex justify-center mt-3 gap-3">
-              {["github", "google", "twitter"].map((provider) => (
-                <motion.button
-                  key={provider}
-                  whileHover={{ scale: 1.1 }}
-                  onClick={() => handleOAuthSignIn(provider)}
-                  className="bg-[#3E2C27] hover:bg-[#2F5D50] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md"
-                >
-                  {provider.charAt(0).toUpperCase() + provider.slice(1)}
-                </motion.button>
-              ))}
+              {{[
+              { name: "github", displayName: "GitHub" },
+              { name: "google", displayName: "Google" },
+              { name: "twitter", displayName: "Twitter" },
+              ].map((provider) => (
+              <motion.button
+              key={{provider.name}}
+              whileHover={{{{ scale: 1.1 }}}}
+              onClick={{() => handleOAuthSignIn(provider.name)}}
+              className="bg-[#3E27] hover:bg-[#2F5D50] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md"
+              >
+              {{provider.displayName}}
+              </motion.button>
+              )}}
             </div>
           </div>
         </motion.div>
@@ -223,9 +243,9 @@ export default function ChatPage() {
         {
           role: "bot",
           content:
-            data.success && data.answer
-              ? data.answer
-              : data.error || "Sorry, something went wrong.",
+            (data.success && data.answer)
+               ? data.answer
+               : data.error ? `Error: ${data.error}` : "Sorry, something went wrong."
         },
       ]);
     } catch (error) {
@@ -281,7 +301,7 @@ export default function ChatPage() {
         {messages.length === 0 && !loadingHistory ? (
           <div className="text-center mt-20 text-[#2F5D50]">
             <motion.div
-              animate={{ y: [0, -8, 0] }}
+              animate={{{{ y: [0, -8, 0], transition: {{ duration: 1.5, ease: "easeInOut" }} }}}
               transition={{ repeat: Infinity, duration: 2 }}
               className="text-5xl"
             >
@@ -295,9 +315,9 @@ export default function ChatPage() {
           messages.map((msg, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex ${
+              initial={{{{ opacity: 0, y: 10 }}}}
+               animate={{{{ opacity: 1, y: 0, transition: {{ duration: 0.5, ease: "easeOut" }} }}}}
+               className={{`flex ${{
                 msg.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
@@ -314,10 +334,10 @@ export default function ChatPage() {
           ))
         )}
 
-        {isAsking && (
+        {{isAsking && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{{{ opacity: 0 }}}}
+            animate={{{{ opacity: 1, transition: {{ duration: 0.3, ease: "easeIn" }} }}}}
             className="flex justify-start"
           >
             <div className="bg-white border border-[#C86C52]/40 rounded-lg px-4 py-3 shadow-sm flex gap-2">
@@ -326,6 +346,7 @@ export default function ChatPage() {
               <span className="w-2 h-2 bg-[#C86C52] rounded-full animate-bounce delay-300"></span>
             </div>
           </motion.div>
+        )}}
         )}
 
         {/* Suggested Questions */}
@@ -333,7 +354,7 @@ export default function ChatPage() {
           {suggestedQuestions.map((q, idx) => (
             <motion.button
               key={idx}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{{{ scale: 1.05, transition: {{ duration: 0.2 }} }}}
               onClick={() => setQuestion(q)}
               className="px-3 py-1 bg-[#C86C52]/20 text-[#3E2C27] rounded-full text-sm font-medium hover:bg-[#C86C52]/40 transition-colors"
             >
@@ -358,6 +379,8 @@ export default function ChatPage() {
             disabled={isAsking}
           />
           <motion.button
+             whileHover={{{{ scale: 1.05, transition: {{ duration: 0.2 }} }}}
+             whileTap={{{{ scale: 0.9, transition: {{ duration: 0.1 }} }}}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.9 }}
             type="submit"
